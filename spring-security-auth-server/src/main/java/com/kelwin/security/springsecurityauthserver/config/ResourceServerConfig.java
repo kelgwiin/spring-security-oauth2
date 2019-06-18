@@ -1,12 +1,17 @@
 package com.kelwin.security.springsecurityauthserver.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 
@@ -16,34 +21,32 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 //@ComponentScan("com.kelwin.security")
 @Configuration
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
-//    @Autowired
-//    private UserDetailsService userDetailsService;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     public ResourceServerConfig() {
         super();
     }
 
-//
-//    @Bean
-//    public AuthenticationProvider authenticationProvider() {
-//        final DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-//        authenticationProvider.setUserDetailsService(userDetailsService);
-//        return authenticationProvider;
-//    }
 
-
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-        authenticationManagerBuilder.inMemoryAuthentication()
-                .withUser("kelwin")
-                .password("kelwin")
-                .roles("USER");
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        final DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService);
+        return authenticationProvider;
     }
 
-//    @Autowired
-//    public void configureGlobal(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-//        authenticationManagerBuilder.authenticationProvider(authenticationProvider())
-//    }
+    @Bean
+    public AuthenticationProvider authProvider() {
+        final DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        return authProvider;
+    }
+
+    @Autowired
+    public void configureGlobal(final AuthenticationManagerBuilder auth) {
+        auth.authenticationProvider(authProvider());
+    }
 
 
     @Override
