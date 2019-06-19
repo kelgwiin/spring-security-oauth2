@@ -1,5 +1,7 @@
 package com.kelwin.security.springsecurityauthserver.controller;
 
+import com.kelwin.security.springsecurityauthserver.model.Item;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -7,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.security.Principal;
 
 @RestController
-@RequestMapping("/rest/hello")
+@RequestMapping("/api/secure")
 public class HelloResource {
 
 
@@ -15,9 +17,15 @@ public class HelloResource {
     public Principal user(Principal principal) {
         return principal;
     }
-    @GetMapping
-    public String hello() {
-        return "Hello World";
+    @GetMapping("/hello")
+    public Item hello() {
+        Item item = new Item();
+        item.setName("Hello world");
+        item.setVersion("v1");
+
+        return item;
     }
+
+
 
 }

@@ -92,7 +92,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         clients.inMemory()
                 .withClient(clientId)
                 .secret(clientSecret)
-                .authorizedGrantTypes(authorizedGrantTypesMainType, authorizedGrantTypeRefresh, "check_token", "<")
+                .authorizedGrantTypes(authorizedGrantTypesMainType, authorizedGrantTypeRefresh, "check_token", "password")
                 .scopes(scopes, "read", "write", "trust")
                 .autoApprove(true)
                 .accessTokenValiditySeconds(accessTokenValiditySeconds)
@@ -112,6 +112,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     }
 
 
+    @SuppressWarnings("RedundantThrows")
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints.

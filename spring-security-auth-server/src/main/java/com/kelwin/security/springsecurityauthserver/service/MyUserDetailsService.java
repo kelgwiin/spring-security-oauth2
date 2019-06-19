@@ -12,20 +12,22 @@ import java.util.Optional;
 
 @Service
 public class MyUserDetailsService implements UserDetailsService {
-    private UsersRepository usersRepository;
+    private final UsersRepository usersRepository;
 
-    public MyUserDetailsService(UsersRepository usersRepository){
+    public MyUserDetailsService(UsersRepository usersRepository) {
         this.usersRepository = usersRepository;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String s) {
         Optional<Users> usersOptional = usersRepository.findByUsername(s);
-        if (usersOptional == null || !usersOptional.isPresent()) {
-            throw new UsernameNotFoundException("User "  + s + " not found");
+        if (!usersOptional.isPresent()) {
+            throw new UsernameNotFoundException("User " + s + " not found");
         }
 
+
         Users u = usersOptional.get();
-        return  new MyUserDetails(u.getUsername(), u.getPassword(), u.getEnabled());
+
+        return new MyUserDetails(u.getUsername(), u.getPassword(), u.getEnabled());
     }
 }
