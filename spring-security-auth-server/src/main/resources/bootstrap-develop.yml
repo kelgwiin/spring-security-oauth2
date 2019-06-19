@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: oauth2-test
+  profiles:
+    active: develop
+  cloud:
+    config:
+      uri: http://localhost:8191

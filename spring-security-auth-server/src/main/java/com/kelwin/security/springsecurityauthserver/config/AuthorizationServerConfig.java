@@ -2,12 +2,14 @@ package com.kelwin.security.springsecurityauthserver.config;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -23,10 +25,10 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
-    @Autowired
     private AuthenticationManager authenticationManager;
-//
+
     @Autowired
+    @Qualifier(value = "myUserDetailsService")
     private UserDetailsService userDetailsService;
 
     @Value("${oauth.config.accessTokenValiditySeconds:3600}")
@@ -51,17 +53,22 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         super();
     }
 
+    public AuthorizationServerConfig(AuthenticationConfiguration authenticationConfiguration) throws Exception{
+        this.authenticationManager =
+                authenticationConfiguration.getAuthenticationManager();
+    }
+
+
+
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
 
         security
                 .tokenKeyAccess("permitAll()")
                 .checkTokenAccess("permitAll()");
-
         super.configure(security);
     }
 
-    //Bean
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
         final JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
