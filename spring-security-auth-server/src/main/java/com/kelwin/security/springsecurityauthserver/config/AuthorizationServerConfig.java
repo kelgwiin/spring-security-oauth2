@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -21,10 +22,16 @@ import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
+    private ApplicationProperties applicationProperties;
 
     private AuthenticationManager authenticationManager;
 
@@ -54,7 +61,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         super();
     }
 
-    public AuthorizationServerConfig(AuthenticationConfiguration authenticationConfiguration) throws Exception{
+    public AuthorizationServerConfig(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         this.authenticationManager =
                 authenticationConfiguration.getAuthenticationManager();
     }
@@ -67,6 +74,11 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .tokenKeyAccess("permitAll()")
                 .checkTokenAccess("permitAll()");
         super.configure(security);
+    }
+
+    @Autowired
+    public void setApplicationProperties(ApplicationProperties applicationProperties) {
+        this.applicationProperties = applicationProperties;
     }
 
     @Bean
@@ -102,10 +114,12 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+
         clients.inMemory()
                 .withClient(clientId)
                 .secret(clientSecret)
                 .authorizedGrantTypes(authorizedGrantTypesMainType, authorizedGrantTypeRefresh, "check_token", "password")
+                .authorities("ROLE_USER")
                 .scopes(scopes, "read", "write", "trust")
                 .autoApprove(true)
                 .accessTokenValiditySeconds(accessTokenValiditySeconds)
@@ -113,11 +127,23 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
                 .and()
 
-                .withClient("refreshClientId")
-                .secret("refreshSecretId")
+                .withClient("AdminClientId")
+                .secret("AdminClientSecretId")
+                .authorities("ROLE_ADMIN")
                 .authorizedGrantTypes(authorizedGrantTypesMainType, authorizedGrantTypeRefresh, "password")
                 .refreshTokenValiditySeconds(accessTokenValiditySeconds * 24)
-                .scopes(scopes, "read", "write", "trust")
+                .scopes(scopes, "read", "write", "trust", "test-admin")
+                .autoApprove(true)
+                .accessTokenValiditySeconds(accessTokenValiditySeconds)
+
+
+                .and()
+                .withClient("ScopeClientId")
+                .secret("ScopeSecretId")
+                .authorities("ROLE_USER")
+                .authorizedGrantTypes(authorizedGrantTypesMainType, authorizedGrantTypeRefresh, "password")
+                .refreshTokenValiditySeconds(accessTokenValiditySeconds * 24)
+                .scopes(scopes, "read", "write", "trust", "test-scope")
                 .autoApprove(true)
                 .accessTokenValiditySeconds(accessTokenValiditySeconds)
 
@@ -135,7 +161,23 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
                 allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST).
                 accessTokenConverter(accessTokenConverter())
-        ;
 
+                .getFrameworkEndpointHandlerMapping().setCorsConfigurations(corsConfigurationMap())
+        ;
     }
+
+    private Map<String, CorsConfiguration> corsConfigurationMap() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        Map<String, CorsConfiguration> configurationMap = new HashMap<>();
+
+        corsConfiguration.setAllowCredentials(applicationProperties.isAllowCredentials());
+        corsConfiguration.setAllowedOrigins(Collections.singletonList(applicationProperties.getAllowedOrigins()));
+        corsConfiguration.setAllowedMethods(Collections.singletonList(applicationProperties.getAllowedMethods()));
+        corsConfiguration.setAllowedHeaders(Collections.singletonList(applicationProperties.getAllowedHeaders()));
+        configurationMap.put("/oauth/*", corsConfiguration);
+
+        return configurationMap;
+    }
+
+
 }
