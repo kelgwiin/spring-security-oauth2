@@ -3,7 +3,6 @@ package com.kelwin.security.springsecurityauthserver.controller;
 import com.kelwin.security.springsecurityauthserver.model.Item;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,7 +41,7 @@ public class HelloResource {
     }
 
     @GetMapping("/hello-scope")
-    @PreAuthorize("#oauth2.hasAnyScope('test-scope')")
+    @PreAuthorize("#oauth2.hasScope('test-scope')")
     public Item helloScope() {
         Item item = new Item();
         item.setName("Hello world Scope");
