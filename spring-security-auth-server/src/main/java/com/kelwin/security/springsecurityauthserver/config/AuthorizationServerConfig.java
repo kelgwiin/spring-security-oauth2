@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -100,6 +99,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         final DefaultTokenServices tokenServices = new DefaultTokenServices();
         tokenServices.setTokenStore(tokenStore());
         tokenServices.setSupportRefreshToken(true);
+        tokenServices.setReuseRefreshToken(false);
         return tokenServices;
     }
 
@@ -118,7 +118,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         clients.inMemory()
                 .withClient(clientId)
                 .secret(clientSecret)
-                .authorizedGrantTypes(authorizedGrantTypesMainType, authorizedGrantTypeRefresh, "check_token", "password")
+                .authorizedGrantTypes(authorizedGrantTypesMainType, authorizedGrantTypeRefresh, "check_token")
                 .authorities("ROLE_USER")
                 .scopes(scopes, "read", "write", "trust")
                 .autoApprove(true)
@@ -130,7 +130,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .withClient("AdminClientId")
                 .secret("AdminClientSecretId")
                 .authorities("ROLE_ADMIN")
-                .authorizedGrantTypes(authorizedGrantTypesMainType, authorizedGrantTypeRefresh, "password")
+                .authorizedGrantTypes(authorizedGrantTypesMainType, authorizedGrantTypeRefresh)
                 .refreshTokenValiditySeconds(accessTokenValiditySeconds * 24)
                 .scopes(scopes, "read", "write", "trust", "test-admin")
                 .autoApprove(true)
@@ -141,7 +141,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
                 .withClient("ScopeClientId")
                 .secret("ScopeSecretId")
                 .authorities("ROLE_USER")
-                .authorizedGrantTypes(authorizedGrantTypesMainType, authorizedGrantTypeRefresh, "password")
+                .authorizedGrantTypes(authorizedGrantTypesMainType, authorizedGrantTypeRefresh)
                 .refreshTokenValiditySeconds(accessTokenValiditySeconds * 24)
                 .scopes(scopes, "read", "write", "trust", "test-scope")
                 .autoApprove(true)
@@ -157,8 +157,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         endpoints.
                 tokenStore(tokenStore()).
                 authenticationManager(authenticationManager).
+                tokenGranter(endpoints.getTokenGranter()).
                 userDetailsService(userDetailsService).
-
+                reuseRefreshTokens(false).
                 allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST).
                 accessTokenConverter(accessTokenConverter())
 
