@@ -1,7 +1,44 @@
-
 server:
   port: 8082
 
 spring:
   main:
     allow-bean-definition-overriding: true
+  kafka:
+    consumer:
+      bootstrap-servers: 192.168.207.250:9092
+      group-id: group-id
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+
+
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: "*"
+            value:
+              default:
+                type:
+    producer:
+      bootstrap-servers: 192.168.207.250:9092
+      key-deserializer: org.springframework.kafka.support.serializer.StringSerializer
+      value-deserializer: org.springframework.kafka.support.serializer.StringSerializer
+      properties:
+        spring:
+          json:
+            add:
+              type:
+                headers: false
+
+
+
+
+  json:
+    trusted:
+      packages: "*"
+
+kafka:
+  topicname: customers

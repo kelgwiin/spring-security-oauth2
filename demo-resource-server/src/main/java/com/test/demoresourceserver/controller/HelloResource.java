@@ -1,55 +1,27 @@
 package com.test.demoresourceserver.controller;
 
-import com.test.demoresourceserver.model.Item;
+import com.test.demoresourceserver.model.Customer;
+import com.test.demoresourceserver.services.ProducerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.Principal;
-
 @RestController
-@RequestMapping("/api/secure")
+@RequestMapping("/api/v1/")
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class HelloResource {
+    private ProducerService producerService;
 
-
-    @GetMapping("/principal")
-    public Principal user(Principal principal) {
-        return principal;
+    public HelloResource(ProducerService producerService){
+        this.producerService = producerService;
     }
-
-    @GetMapping("/hello")
-    public Item hello() {
-        Item item = new Item();
-        item.setName("Hello world");
-        item.setVersion("v1");
-
-        return item;
-    }
-
-
-    @GetMapping("/hello-admin")
+    @PostMapping("/customer")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public Item helloAdmin() {
-        Item item = new Item();
-        item.setName("Hello world Admin");
-        item.setVersion("v1");
-
-        return item;
+    public void sendCustomerQueue(@RequestBody Customer customer) {
+        producerService.sendMessage(customer);
     }
-
-    @GetMapping("/hello-scope")
-    @PreAuthorize("#oauth2.hasScope('test-scope')")
-    public Item helloScope() {
-        Item item = new Item();
-        item.setName("Hello world Scope");
-        item.setVersion("v1");
-
-        return item;
-    }
-
-
-
 }

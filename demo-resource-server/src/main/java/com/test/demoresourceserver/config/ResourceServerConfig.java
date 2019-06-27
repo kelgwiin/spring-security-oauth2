@@ -35,7 +35,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/oauth/*").permitAll()
-                .antMatchers("/api/secure/**").authenticated();
+                .antMatchers("/api/v1/**").authenticated();
 
     }
 
