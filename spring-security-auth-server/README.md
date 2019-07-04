@@ -1,3 +1,9 @@
+Run the App
+==========
+Add to your enviroment configuration this variable 
+<code>SPRING.PROFILES.ACTIVE=develop</code>
+
+
 Asymmetric Keypair
 ==================
 
